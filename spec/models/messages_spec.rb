@@ -71,7 +71,7 @@ describe Message, type: :model do
     end
 
     context 'with previous message' do
-      let(:topic) { FactoryBot.create :message }
+      let(:topics) { FactoryBot.create :message }
       let(:reply) do
         FactoryBot.create :message, forum: forum, subject: 'Test reply', parent: topic
       end

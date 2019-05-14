@@ -26,33 +26,57 @@
 # See docs/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    module WorkPackages
-      class ParseParamsService < API::V3::ParseResourceParamsService
-        def initialize(user)
-          super(user, representer: ::API::V3::WorkPackages::WorkPackagePayloadRepresenter)
+module OpenProject::Bcf::API
+  class ProjectsEndpoint < ::API::OpenProjectAPI
+    include OpenProject::StaticRouting::UrlHelpers
+
+    resources :projects do
+      get do
+        Project
+          .visible
+          .active
+          .includes(:enabled_modules)
+          .where('enabled_modules.name = ?', :bcf)
+          .references('enabled_modules')
+          .map do |project|
+          {
+            project_id: project.identifier,
+            name: project.name
+          }
+        end
+      end
+
+      route_param :id, regexp: /\A([\w\-]+)\z/ do
+        after_validation do
+          @project = Project.find(params[:id])
         end
 
-        private
-
-        def parse_attributes(request_body)
-          ::API::V3::WorkPackages::WorkPackagePayloadRepresenter
-            .create_class(struct)
-            .new(struct, current_user: current_user)
-            .from_hash(Hash(request_body))
-            .to_h
-            .reverse_merge(lock_version: nil)
+        get do
+          {
+            project_id: @project.identifier,
+            name: @project.name
+          }
         end
 
-        def struct
-          ParsingStruct.new
+        get '/extensions' do
+          {
+            topic_type: @project.types.pluck(:name),
+            topic_status: Status.pluck(:name),
+            priority: IssuePriority.pluck(:name),
+            user_id_type: @project.users.pluck(:mail),
+            project_actions: Projects::ProjectActions.build(@project, current_user)
+          }
         end
 
-        class ParsingStruct < OpenStruct
-          def available_custom_fields
-            @available_custom_fields ||= WorkPackageCustomField.all.to_a
-          end
+        mount OpenProject::Bcf::API::Topic::TopicsByProjectEndpoint
+
+        params do
+          optional :name
+        end
+
+        put do
+          @project.update(name: name)
+          status 204
         end
       end
     end

@@ -62,7 +62,7 @@ describe MessagesController, type: :controller do
 
         expect(response).to be_successful
         expect(response).to render_template 'messages/show'
-        expect(assigns(:topic)).to be_present
+        expect(assigns(:topics)).to be_present
         expect(assigns(:forum)).to be_present
         expect(assigns(:project)).to be_present
       end

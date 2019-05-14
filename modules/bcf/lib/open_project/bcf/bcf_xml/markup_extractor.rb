@@ -72,6 +72,10 @@ module OpenProject::Bcf::BcfXml
       end
     end
 
+    def related_topics
+      doc.xpath('/Markup/Topic/RelatedTopic').map { |node| node['Guid'] }
+    end
+
     private
 
     def extract_non_empty(path, prefix: '/Markup/Topic/'.freeze, attribute: false)

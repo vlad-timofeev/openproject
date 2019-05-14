@@ -35,6 +35,8 @@
 
 OpenProject::Application.routes.draw do
   scope '', as: 'bcf' do
+    mount ::OpenProject::Bcf::API::Root => '/bcf'
+
     scope 'projects/:project_id', as: 'project' do
       resources :issues, controller: 'bcf/issues' do
         get :import, action: :import, on: :collection

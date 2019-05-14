@@ -28,30 +28,20 @@
 
 module API
   module V3
-    module WorkPackages
-      class ParseParamsService < API::V3::ParseResourceParamsService
-        def initialize(user)
-          super(user, representer: ::API::V3::WorkPackages::WorkPackagePayloadRepresenter)
-        end
+    module Activities
+      module CommentsHelper
+        def comment_on_work_package(work_package, notify:, comment:)
+          result = AddWorkPackageNoteService
+                     .new(user: current_user,
+                          work_package: work_package)
+                     .call(comment,
+                           send_notifications: notify)
 
-        private
-
-        def parse_attributes(request_body)
-          ::API::V3::WorkPackages::WorkPackagePayloadRepresenter
-            .create_class(struct)
-            .new(struct, current_user: current_user)
-            .from_hash(Hash(request_body))
-            .to_h
-            .reverse_merge(lock_version: nil)
-        end
-
-        def struct
-          ParsingStruct.new
-        end
-
-        class ParsingStruct < OpenStruct
-          def available_custom_fields
-            @available_custom_fields ||= WorkPackageCustomField.all.to_a
+          if result.success?
+            journals = ::Journal::AggregatedJournal.aggregated_journals(journable: work_package)
+            Activities::ActivityRepresenter.new(journals.last, current_user: current_user)
+          else
+            fail ::API::Errors::ErrorBase.create_and_merge_errors(result.errors)
           end
         end
       end

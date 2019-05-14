@@ -29,5 +29,9 @@ module Bcf
 
     has_many :viewpoints, foreign_key: :issue_id, class_name: "Bcf::Viewpoint"
     has_many :comments, foreign_key: :issue_id, class_name: "Bcf::Comment"
+
+    def document
+      Nokogiri::XML(markup)
+    end
   end
 end

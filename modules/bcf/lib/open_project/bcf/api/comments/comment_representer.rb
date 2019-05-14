@@ -1,3 +1,4 @@
+#-- encoding: UTF-8
 #-- copyright
 # OpenProject is a project management system.
 # Copyright (C) 2012-2018 the OpenProject Foundation (OPF)
@@ -26,35 +27,41 @@
 # See docs/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    module WorkPackages
-      class ParseParamsService < API::V3::ParseResourceParamsService
-        def initialize(user)
-          super(user, representer: ::API::V3::WorkPackages::WorkPackagePayloadRepresenter)
-        end
+require 'roar/decorator'
+require 'roar/json'
 
-        private
+module ::OpenProject::Bcf::API
+  module Comments
+    class CommentRepresenter < ::Roar::Decorator
+      include ::Roar::JSON::HAL
 
-        def parse_attributes(request_body)
-          ::API::V3::WorkPackages::WorkPackagePayloadRepresenter
-            .create_class(struct)
-            .new(struct, current_user: current_user)
-            .from_hash(Hash(request_body))
-            .to_h
-            .reverse_merge(lock_version: nil)
-        end
+      attr_reader :current_user, :comment
 
-        def struct
-          ParsingStruct.new
-        end
-
-        class ParsingStruct < OpenStruct
-          def available_custom_fields
-            @available_custom_fields ||= WorkPackageCustomField.all.to_a
-          end
-        end
+      def initialize(comment, journal: nil, current_user:)
+        super(journal || comment.journal)
+        @comment = comment
+        @current_user = current_user
       end
+
+      property :uuid,
+               as: :guid,
+               exec_context: :decorator,
+               getter: ->(*) { comment.uuid }
+
+      property :notes,
+               as: :comment
+
+      property :topic_guid,
+               exec_context: :decorator,
+               getter: ->(*) { comment.issue.uuid }
+
+      property :created_at,
+               as: :date,
+               getter: ->(*) { created_at.iso8601 }
+
+      property :author,
+               getter: ->(*) { user&.name }
+
     end
   end
 end

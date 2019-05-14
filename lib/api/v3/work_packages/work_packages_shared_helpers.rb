@@ -52,8 +52,6 @@ module API
           fail ::API::Errors::MultipleErrors.create_if_many(api_errors)
         end
 
-        private
-
         def merge_dependent_errors(work_package, result)
           errors = ActiveModel::Errors.new work_package
 

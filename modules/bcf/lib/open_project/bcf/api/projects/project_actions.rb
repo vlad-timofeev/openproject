@@ -26,32 +26,14 @@
 # See docs/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    module WorkPackages
-      class ParseParamsService < API::V3::ParseResourceParamsService
-        def initialize(user)
-          super(user, representer: ::API::V3::WorkPackages::WorkPackagePayloadRepresenter)
-        end
-
-        private
-
-        def parse_attributes(request_body)
-          ::API::V3::WorkPackages::WorkPackagePayloadRepresenter
-            .create_class(struct)
-            .new(struct, current_user: current_user)
-            .from_hash(Hash(request_body))
-            .to_h
-            .reverse_merge(lock_version: nil)
-        end
-
-        def struct
-          ParsingStruct.new
-        end
-
-        class ParsingStruct < OpenStruct
-          def available_custom_fields
-            @available_custom_fields ||= WorkPackageCustomField.all.to_a
+module OpenProject::Bcf::API
+  module Projects
+    module ProjectActions
+      class << self
+        def build(project, current_user)
+          [].tap do |actions|
+            actions << 'update' if current_user.allowed_to?(:edit_project, project)
+            actions << 'createTopic' if current_user.allowed_to?(:add_work_packages, project)
           end
         end
       end

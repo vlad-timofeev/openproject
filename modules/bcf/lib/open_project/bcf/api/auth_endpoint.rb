@@ -26,35 +26,17 @@
 # See docs/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    module WorkPackages
-      class ParseParamsService < API::V3::ParseResourceParamsService
-        def initialize(user)
-          super(user, representer: ::API::V3::WorkPackages::WorkPackagePayloadRepresenter)
-        end
+module OpenProject::Bcf::API
+  class AuthEndpoint < ::API::OpenProjectAPI
+    include OpenProject::StaticRouting::UrlHelpers
 
-        private
-
-        def parse_attributes(request_body)
-          ::API::V3::WorkPackages::WorkPackagePayloadRepresenter
-            .create_class(struct)
-            .new(struct, current_user: current_user)
-            .from_hash(Hash(request_body))
-            .to_h
-            .reverse_merge(lock_version: nil)
-        end
-
-        def struct
-          ParsingStruct.new
-        end
-
-        class ParsingStruct < OpenStruct
-          def available_custom_fields
-            @available_custom_fields ||= WorkPackageCustomField.all.to_a
-          end
-        end
-      end
+    get '/auth' do
+      {
+        oauth2_auth_url: oauth_authorization_url,
+        oauth2_token_url: oauth_token_url,
+        http_basic_supported: true,
+        supported_oauth2_flows: %w[authorization_code_grant]
+      }
     end
   end
 end

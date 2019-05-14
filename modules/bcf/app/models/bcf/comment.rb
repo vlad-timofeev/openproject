@@ -3,7 +3,7 @@ module Bcf
     include InitializeWithUuid
 
     belongs_to :journal
-    belongs_to :issue, foreign_key: :issue_id, class_name: "Bcf::Issue"
+  belongs_to :issue, foreign_key: :issue_id, class_name: "Bcf::Issue"
 
     validates_presence_of :uuid
 

@@ -50,8 +50,7 @@ module OpenProject::Bcf::BcfXml
     def synchronize_topics(zip)
       yield_topic_entries(zip)
         .map do |entry|
-          issue = IssueReader.new(project, zip, entry, current_user: current_user).extract!
-          issue.save
+          IssueReader.new(project, zip, entry, current_user: current_user).extract!
         end
         .count
     end

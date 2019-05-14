@@ -32,10 +32,18 @@ module OpenProject::Bcf::BcfXml
       # Comments will be extended on import
       build_comments
 
-      issue
+      # Save the issue
+      issue.save
+
+      # Save related topics
+      create_related_topics
     end
 
     private
+
+    def create_related_topics
+
+    end
 
     def synchronize_with_work_package
       call =
