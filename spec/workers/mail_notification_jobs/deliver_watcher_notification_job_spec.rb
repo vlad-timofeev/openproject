@@ -49,7 +49,7 @@ describe DeliverWatcherNotificationJob, type: :model do
   end
 
   it 'sends a mail' do
-    expect(UserMailer).to receive(:work_package_watcher_added).with(work_package,
+    expect(UserMailer).to receive(:work_package_watcher_toggled).with(work_package,
                                                                     watcher_user,
                                                                     watcher_setter,
                                                                     is_watching)
