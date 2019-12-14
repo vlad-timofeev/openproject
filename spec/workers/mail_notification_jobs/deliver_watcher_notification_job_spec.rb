@@ -29,15 +29,14 @@
 
 require 'spec_helper'
 
-describe DeliverWatcherNotificationJob, type: :model do
+shared_examples "DeliverWatcherNotificationJob" do
   let(:project) { FactoryBot.create(:project) }
   let(:role) { FactoryBot.create(:role, permissions: [:view_work_packages]) }
   let(:watcher_setter) { FactoryBot.create(:user) }
-  let(:is_watching) { true }
   let(:watcher_user) do
     FactoryBot.create(:user, member_in_project: project, member_through_role: role)
   end
-  let(:work_package) { FactoryBot.build(:work_package, project: project) }
+  let(:work_package) { FactoryBot.create(:work_package, project: project) }
   let(:watcher) { FactoryBot.create(:watcher, watchable: work_package, user: watcher_user) }
 
   subject { described_class.new.perform(work_package.id, watcher_user.id, watcher_setter.id, is_watching) }
@@ -68,5 +67,17 @@ describe DeliverWatcherNotificationJob, type: :model do
         expect { subject }.to raise_error(SocketError)
       end
     end
+  end
+end
+
+describe DeliverWatcherRemovedNotificationJob, type: :model do
+  include_examples "DeliverWatcherNotificationJob" do
+    let(:is_watching) { true }
+  end
+end
+
+describe DeliverWatcherRemovedNotificationJob, type: :model do
+  include_examples "DeliverWatcherNotificationJob" do
+    let(:is_watching) { false }
   end
 end
