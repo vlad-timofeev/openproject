@@ -34,6 +34,7 @@ class Services::RemoveWatcher
 
   def run(success: -> {}, failure: -> {})
     watcher = @work_package.watchers.find_by(user_id: @user.id)
+
     if watcher.present?
       @work_package.watcher_users.delete(@user)
       success.call
