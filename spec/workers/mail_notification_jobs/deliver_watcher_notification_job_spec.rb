@@ -33,24 +33,26 @@ describe DeliverWatcherNotificationJob, type: :model do
   let(:project) { FactoryBot.create(:project) }
   let(:role) { FactoryBot.create(:role, permissions: [:view_work_packages]) }
   let(:watcher_setter) { FactoryBot.create(:user) }
+  let(:is_watching) { true }
   let(:watcher_user) do
     FactoryBot.create(:user, member_in_project: project, member_through_role: role)
   end
   let(:work_package) { FactoryBot.build(:work_package, project: project) }
   let(:watcher) { FactoryBot.create(:watcher, watchable: work_package, user: watcher_user) }
 
-  subject { described_class.new.perform(watcher.id, watcher_user.id, watcher_setter.id) }
+  subject { described_class.new.perform(watcher.id, watcher_user.id, watcher_setter.id, is_watching) }
 
   before do
     # make sure no actual calls make it into the UserMailer
-    allow(UserMailer).to receive(:work_package_watcher_added)
+    allow(UserMailer).to receive(:work_package_watcher_toggled)
       .and_return(double('mail', deliver_now: nil))
   end
 
   it 'sends a mail' do
     expect(UserMailer).to receive(:work_package_watcher_added).with(work_package,
                                                                     watcher_user,
-                                                                    watcher_setter)
+                                                                    watcher_setter,
+                                                                    is_watching)
     subject
   end
 
@@ -59,7 +61,7 @@ describe DeliverWatcherNotificationJob, type: :model do
       before do
         mail = double('mail')
         allow(mail).to receive(:deliver_now).and_raise(SocketError)
-        expect(UserMailer).to receive(:work_package_watcher_added).and_return(mail)
+        expect(UserMailer).to receive(:work_package_watcher_toggled).and_return(mail)
       end
 
       it 'raises the error' do

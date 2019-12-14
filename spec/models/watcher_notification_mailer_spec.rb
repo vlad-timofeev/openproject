@@ -29,8 +29,8 @@
 require 'spec_helper'
 
 describe WatcherNotificationMailer do
-  def call_listener(watcher, watcher_setter)
-    described_class.handle_watcher(watcher, watcher_setter)
+  def call_listener(watcher, watcher_setter, is_watching)
+    described_class.handle_watcher_toggle(watcher, watcher_setter, is_watching)
   end
 
   before do
@@ -52,6 +52,8 @@ describe WatcherNotificationMailer do
                                 mail_notification: watching_setting,
                                 preference: user_pref)
     end
+
+    let (:is_watching) { true }
 
     let(:watching_setting) { 'all' }
     let(:self_notified) { true }
@@ -82,7 +84,7 @@ describe WatcherNotificationMailer do
 
         it 'notifies the watcher' do
           expect(DeliverWatcherNotificationJob).to receive(:perform_later)
-          call_listener(watcher, watcher_setter)
+          call_listener(watcher, watcher_setter, is_watching)
         end
       end
 
@@ -92,7 +94,7 @@ describe WatcherNotificationMailer do
 
         it 'notifies the watcher' do
           expect(DeliverWatcherNotificationJob).to receive(:perform_later)
-          call_listener(watcher, watcher_setter)
+          call_listener(watcher, watcher_setter, is_watching)
         end
       end
 
@@ -103,7 +105,7 @@ describe WatcherNotificationMailer do
 
         it 'does not notify the watcher' do
           expect(DeliverWatcherNotificationJob).not_to receive(:perform_later)
-          call_listener(watcher, watcher_setter)
+          call_listener(watcher, watcher_setter, is_watching)
         end
       end
 
@@ -114,7 +116,7 @@ describe WatcherNotificationMailer do
 
         it 'notifies the watcher' do
           expect(DeliverWatcherNotificationJob).to receive(:perform_later)
-          call_listener(watcher, watcher_setter)
+          call_listener(watcher, watcher_setter, is_watching)
         end
       end
     end
@@ -125,7 +127,7 @@ describe WatcherNotificationMailer do
       context 'when added by a different user' do
         it 'does not notify the watcher' do
           expect(DeliverWatcherNotificationJob).not_to receive(:perform_later)
-          call_listener(watcher, watcher_setter)
+          call_listener(watcher, watcher_setter, is_watching)
         end
       end
 
@@ -135,7 +137,7 @@ describe WatcherNotificationMailer do
 
         it 'does not notify the watcher' do
           expect(DeliverWatcherNotificationJob).not_to receive(:perform_later)
-          call_listener(watcher, watcher_setter)
+          call_listener(watcher, watcher_setter, is_watching)
         end
       end
     end
