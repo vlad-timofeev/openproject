@@ -40,7 +40,7 @@ describe DeliverWatcherNotificationJob, type: :model do
   let(:work_package) { FactoryBot.build(:work_package, project: project) }
   let(:watcher) { FactoryBot.create(:watcher, watchable: work_package, user: watcher_user) }
 
-  subject { described_class.new.perform(watcher.id, watcher_user.id, watcher_setter.id, is_watching) }
+  subject { described_class.new.perform(work_package.id, watcher_user.id, watcher_setter.id, is_watching) }
 
   before do
     # make sure no actual calls make it into the UserMailer
