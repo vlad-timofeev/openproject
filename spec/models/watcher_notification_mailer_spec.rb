@@ -78,6 +78,17 @@ describe WatcherNotificationMailer do
     shared_examples_for 'notifies the added watcher for' do |setting|
       let(:watching_setting) { setting }
 
+      context 'when removed by a different user
+               and has self_notified activated' do
+        let(:self_notified) { true }
+        let(:is_watching) { false }
+
+        it 'notifies the watcher' do
+          expect(DeliverWatcherNotificationJob).to receive(:perform_later)
+          call_listener(watcher, watcher_setter, is_watching)
+        end
+      end
+
       context 'when added by a different user
                and has self_notified activated' do
         let(:self_notified) { true }
