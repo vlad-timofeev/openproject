@@ -70,13 +70,13 @@ shared_examples "DeliverWatcherNotificationJob" do
   end
 end
 
-describe DeliverWatcherRemovedNotificationJob, type: :model do
+describe DeliverWatcherNotificationJob, type: :model do
   include_examples "DeliverWatcherNotificationJob" do
     let(:is_watching) { true }
   end
 end
 
-describe DeliverWatcherRemovedNotificationJob, type: :model do
+describe DeliverWatcherNotificationJob, type: :model do
   include_examples "DeliverWatcherNotificationJob" do
     let(:is_watching) { false }
   end
