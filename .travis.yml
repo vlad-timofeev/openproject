@@ -45,6 +45,7 @@ branches:
   only:
     - master
     - dev
+    - notify-removed-watchers-21304
     - /^(stable|release)\/.*$/
 
 env:
